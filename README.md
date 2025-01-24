@@ -20,4 +20,4 @@ This is an AI-powered platform designed to help students prepare for the real es
 ## Getting Started
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/real-estate-exam-ai.git
+   git clone https://github.com/dieselx42/real-estate-ai-tutor.git
