@@ -1,87 +1,64 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
+import GeneratedQuestion from "./components/GeneratedQuestion";
+import QuestionList from "./components/QuestionList";
+import Header from "./components/Header";
+import Footer from "./components/Footer";
+import { fetchData } from "./services/api";
 
-interface BackendData {
-  data: string;
-}
-
-interface QuestionsResponse {
-  questions: string[];
-}
-
-interface GeneratedQuestionResponse {
-  question: string;
-}
+const topics = ["general real estate", "property valuation", "contracts", "financing"];
 
 export default function Home() {
-  const [data, setData] = useState<BackendData | null>(null);
+  const [data, setData] = useState(null);
   const [questions, setQuestions] = useState<string[]>([]);
-  const [generatedQuestion, setGeneratedQuestion] = useState<string | null>(null);
-
-  const fetchGeneratedQuestion = async () => {
-    console.log('Fetching new question...');
-    try {
-      const response = await fetch('http://127.0.0.1:8000/api/generate-question');
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data: GeneratedQuestionResponse = await response.json();
-      console.log('Data:', data);
-      setGeneratedQuestion(data.question);
-    } catch (error) {
-      console.error('Error fetching generated question:', error);
-    }
-  };
+  const [selectedTopic, setSelectedTopic] = useState("general real estate");
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch data from the backend
-    fetch('http://127.0.0.1:8000/api/data')
-      .then((response) => response.json())
-      .then((data: BackendData) => setData(data))
-      .catch((error) => console.error('Error fetching data:', error));
+    const fetchQuestions = async () => {
+      try {
+        const response = await fetchData(`/api/questions?topic=${encodeURIComponent(selectedTopic)}`);
+        setQuestions(response.questions);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch questions.");
+      }
+    };
 
-    // Fetch questions from the backend
-    fetch('http://127.0.0.1:8000/api/questions')
-      .then((response) => response.json())
-      .then((data: QuestionsResponse) => setQuestions(data.questions))
-      .catch((error) => console.error('Error fetching questions:', error));
-
-    // Fetch a generated question from the backend
-    fetchGeneratedQuestion();
-  }, []);
+    fetchQuestions();
+  }, [selectedTopic]);
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Welcome to the Real Estate Exam AI!</h1>
-      {data ? (
-        <p className="mb-4">Data from backend: {data.data}</p>
-      ) : (
-        <p className="mb-4">Loading...</p>
-      )}
+    <div className="flex flex-col min-h-screen">
+      <Header />
+      <main className="flex-grow p-4">
+        <h1 className="text-2xl font-bold mb-4">Welcome to the Real Estate AI Tutor!</h1>
 
-      <h2 className="text-xl font-semibold mb-2">Real Estate Questions:</h2>
-      <ul className="list-disc list-inside mb-4">
-        {questions.map((question, index) => (
-          <li key={index} className="mb-1">{question}</li>
-        ))}
-      </ul>
-
-      <h2 className="text-xl font-semibold mb-2">Generated Question:</h2>
-      {generatedQuestion ? (
-        <div className="bg-gray-100 p-4 rounded-lg mb-4">
-          <pre className="whitespace-pre-wrap text-black">{generatedQuestion}</pre>
+        <div className="mb-4">
+          <label htmlFor="topic" className="block text-sm font-medium mb-2">Select Topic:</label>
+          <select
+            id="topic"
+            value={selectedTopic}
+            onChange={(e) => setSelectedTopic(e.target.value)}
+            className="p-2 border rounded-md bg-white text-gray-800"
+          >
+            <option value="" disabled className="text-gray-400">Choose a topic...</option>
+            {topics.map((topic) => (
+              <option key={topic} value={topic}>
+                {topic}
+              </option>
+            ))}
+          </select>
         </div>
-      ) : (
-        <p>Loading...</p>
-      )}
 
-      <button
-        onClick={fetchGeneratedQuestion}
-        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-      >
-        Generate New Question
-      </button>
+        {error ? (
+          <div className="text-red-500">{error}</div>
+        ) : (
+          <QuestionList questions={questions} />
+        )}
+      </main>
+      <Footer />
     </div>
   );
 }
