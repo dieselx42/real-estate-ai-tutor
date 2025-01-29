@@ -19,3 +19,36 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+input, select, textarea {
+  color: var(--foreground); /* Ensure text color adapts to light/dark mode */
+  background-color: var(--background); /* Match background with theme */
+  border: 1px solid #ccc;
+  padding: 8px;
+  border-radius: 4px;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #007BFF; /* Add focus ring for better accessibility */
+  outline-offset: 2px;
+}
+
+input::placeholder, textarea::placeholder {
+  color: #888; /* Ensure placeholder text is always visible */
+}
+
+/* Ensure dark text for buttons and inputs */
+button, input, select, textarea {
+  color: #000; /* Dark text */
+  background-color: #fff; /* White background */
+  border: 1px solid #ccc; /* Subtle border */
+}
+
+button:disabled {
+  color: #666; /* Slightly lighter text for disabled buttons */
+  background-color: #f9f9f9; /* Light gray background for disabled state */
+}
+
+input::placeholder, textarea::placeholder {
+  color: #888; /* Subtle placeholder color */
+}
