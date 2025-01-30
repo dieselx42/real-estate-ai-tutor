@@ -4,6 +4,10 @@ import openai
 import os
 from dotenv import load_dotenv
 
+# Correct import path for routes
+from routes.questions import router as questions_router
+from routes.progress import router as progress_router
+
 # Load environment variables
 load_dotenv()
 
@@ -13,7 +17,7 @@ app = FastAPI()
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Adjust if your frontend is hosted elsewhere
+    allow_origins=["http://localhost:3000"],  # Adjust if frontend is hosted elsewhere
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -102,3 +106,7 @@ def get_questions(topic: str = "general real estate"):
     except Exception as e:
         print("Error generating questions:", e)
         return {"error": str(e)}
+
+# Register API routers
+app.include_router(questions_router, prefix="/api/questions", tags=["Questions"])
+app.include_router(progress_router, prefix="/api/progress", tags=["Progress"])

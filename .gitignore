@@ -172,4 +172,5 @@ cython_debug/
 #.idea/
 
 # PyPI configuration file
-.pypirc
+.pypircfrontend/.next/
+frontend/.next/
