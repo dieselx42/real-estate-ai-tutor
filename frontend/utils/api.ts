@@ -1,45 +1,45 @@
-export const API_BASE_URL = "http://127.0.0.1:8000/api";
+const API_BASE_URL = "http://localhost:8000/api"; // ✅ Ensure this matches your backend
 
-/**
- * Fetches data from the backend with cache prevention.
- */
-export const fetchData = async (endpoint: string) => {
-  if (!endpoint) {
-    console.error("❌ fetchData Error: No endpoint provided");
-    return { error: "No endpoint provided" };
-  }
-
+// ✅ Generic fetch function with error handling
+export async function fetchData(endpoint: string) {
   console.log(`🔵 Fetching data from: ${API_BASE_URL}${endpoint}`);
 
   try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}?nocache=${new Date().getTime()}`, {
-      method: "GET",
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-        Pragma: "no-cache",
-        Expires: "0",
-      },
-    });
+    const response = await fetch(`${API_BASE_URL}${endpoint}`);
 
     if (!response.ok) {
       throw new Error(`❌ HTTP error! Status: ${response.status}`);
     }
 
-    return await response.json();
+    const data = await response.json();
+    return data;
   } catch (error) {
-    console.error("❌ fetchData Error:", error);
-    return { error: "Failed to fetch data" };
+    console.error(`❌ Fetch failed for ${endpoint}:`, error);
+    return null;
   }
-};
+}
 
-/**
- * Fetches multiple real estate exam questions from the backend.
- */
-export const fetchQuestions = async (topic: string = "general real estate") => {
-  const data = await fetchData(`/questions?topic=${encodeURIComponent(topic)}`);
+// ✅ Fetch Exam Questions
+export async function fetchQuestions(topic: string) {
+  console.log("🔵 Fetching questions from backend...");
+return fetchData(`/questions/?topic=${topic}`);  // ✅ Corrected API call
+}
 
-  console.log("🔍 API Response (Questions):", JSON.stringify(data, null, 2));
+// ✅ Fetch AI Recommendations
+export async function fetchAIRecommendations() {
+  console.log("🔵 Fetching AI Recommendations...");
+  return fetchData(`/ai-recommendations/`); // ✅ Added /
+}
 
-  return data;
-};
+// ✅ Fetch User Progress
+export async function fetchUserProgress(userId: string) {
+  console.log(`🔵 Fetching progress for user: ${userId}`);
+  return fetchData(`/user-progress/?userId=${userId}`); // ✅ Added /
+}
+
+// ✅ Fetch Upcoming Sessions
+export async function fetchUpcomingSessions() {
+  console.log("🔵 Fetching upcoming sessions...");
+  return fetchData(`/upcoming-sessions/`); // ✅ Added /
+}
 

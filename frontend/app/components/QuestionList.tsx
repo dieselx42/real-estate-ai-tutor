@@ -1,69 +1,64 @@
-import React, { useEffect } from "react";
+"use client";
 
-interface QuestionListProps {
-  questions: string[];
-  onAnswer: (index: number, selectedOption: string) => void;
-  userAnswers: string[];
+import React from "react";
+
+interface Question {
+  question: string;
+  options: string[];
+  answer: string;
 }
 
-const QuestionList: React.FC<QuestionListProps> = ({ questions, onAnswer, userAnswers }) => {
-  useEffect(() => {
-    console.log("✅ UI Updated: Checking latest answer states", userAnswers);
-  }, [userAnswers]);
+interface QuestionListProps {
+  questions: Question[];
+  onAnswer: (index: number, selectedOption: string) => void;
+  userAnswers: string[];
+  correctAnswers: { [key: number]: string };
+}
 
+const QuestionList: React.FC<QuestionListProps> = ({
+  questions,
+  onAnswer,
+  userAnswers,
+  correctAnswers,
+}) => {
   return (
     <div className="space-y-6">
-      {questions.map((question, index) => {
-        // Extract question text
-        const questionText = question.split("\n").find((line) => line.startsWith("Question:")) || "Unknown Question";
-
-        // Extract answer options
-        const options = question
-          .split("\n")
-          .filter((line) => /^[A-D]\./.test(line)) // Finds lines starting with A., B., C., D.
-          .map((line) => line.trim());
-
-        // Extract correct answer
-        const correctAnswerLine = question.split("\n").find((line) => line.toLowerCase().startsWith("answer:"));
-        const correctAnswerMatch = correctAnswerLine?.replace(/answer:\s*/i, "").trim().match(/^([A-D])/i);
-        const correctAnswer = correctAnswerMatch ? correctAnswerMatch[1].toUpperCase() : "";
-
-        // Get user's selected answer
-        const userAnswer = userAnswers[index] || "";
+      {questions.map((q, index) => {
+        if (!q || typeof q !== "object" || !q.question || !q.options) {
+          console.error(`❌ Invalid question format at index ${index}:`, q);
+          return null;
+        }
 
         return (
-          <div key={index} className="border p-4 rounded-md shadow">
-            <p className="font-semibold">{questionText}</p>
-
-            <div className="mt-2 space-y-2">
-              {options.map((option) => {
+          <div key={index} className="p-4 border rounded-lg shadow-md bg-white dark:bg-gray-900">
+            <h2 className="text-lg font-bold mb-2 text-foreground">{q.question}</h2>
+            <div className="space-y-2">
+              {q.options.map((option, optionIndex) => {
                 const optionLetter = option.charAt(0).toUpperCase(); // Extract A, B, C, D
+                const userAnswer = userAnswers[index]; // What the user selected
+                const correctAnswer = correctAnswers[index]; // The correct answer letter
+
+                const isSelected = userAnswer === option; // User selected this option
+                const isCorrect = correctAnswer === optionLetter; // This option is correct
+                const isWrongSelection = isSelected && !isCorrect; // User picked wrong
+
+                const isAnswered = userAnswer !== ""; // If user answered
+
                 return (
                   <button
-                    key={option}
-                    onClick={() => onAnswer(index, optionLetter)}
-                    className={`block w-full text-left px-4 py-2 border rounded-md ${
-                      userAnswer === optionLetter
-                        ? userAnswer === correctAnswer
-                          ? "bg-green-300 text-green-800 border-green-500" // ✅ Correct (Green)
-                          : "bg-red-300 text-red-800 border-red-500" // ❌ Incorrect (Red)
-                        : "bg-white text-black border-gray-300 hover:bg-gray-100"
-                    }`}
+                    key={optionIndex}
+                    className={`answer-button 
+                      ${isAnswered && isCorrect ? "answer-correct" : ""} 
+                      ${isAnswered && isWrongSelection ? "answer-incorrect" : ""} 
+                      ${!isAnswered ? "answer-neutral" : ""}`}
+                    onClick={() => onAnswer(index, option)}
+                    disabled={isAnswered}
                   >
                     {option}
                   </button>
                 );
               })}
             </div>
-
-            {/* ✅ Correct Answer Display */}
-            {userAnswer && (
-              <p className={`mt-2 font-semibold ${userAnswer === correctAnswer ? "text-green-600" : "text-red-600"}`}>
-                {userAnswer === correctAnswer
-                  ? `✅ Correct Answer: ${correctAnswer}`
-                  : `❌ Correct Answer: ${correctAnswer}`}
-              </p>
-            )}
           </div>
         );
       })}

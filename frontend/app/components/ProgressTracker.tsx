@@ -1,17 +1,30 @@
+"use client";
+
+import React from "react";
+
 interface ProgressTrackerProps {
   correct: number;
   total: number;
 }
 
-export default function ProgressTracker({ correct, total }: ProgressTrackerProps) {
+const ProgressTracker: React.FC<ProgressTrackerProps> = ({ correct, total }) => {
   const accuracy = total > 0 ? Math.round((correct / total) * 100) : 0;
 
   return (
-    <div className="mt-4 p-4 bg-gray-100 rounded-lg">
-      <h2 className="text-lg font-bold text-black">Progress</h2>
-      <p className="text-black">Correct Answers: {correct}</p>
-      <p className="text-black">Total Questions: {total}</p>
-      <p className="text-black">Accuracy: {accuracy}%</p>
+    <div className="p-4 border rounded-lg shadow-md bg-white dark:bg-gray-900">
+      <h2 className="text-lg font-bold mb-2 text-black dark:text-white">Progress</h2>
+
+      <p className="text-md font-medium text-black dark:text-gray-300">
+        <strong>Correct Answers:</strong> {correct}
+      </p>
+      <p className="text-md font-medium text-black dark:text-gray-300">
+        <strong>Total Questions:</strong> {total}
+      </p>
+      <p className="text-md font-medium text-black dark:text-gray-300">
+        <strong>Accuracy:</strong> {accuracy}%
+      </p>
     </div>
   );
-}
+};
+
+export default ProgressTracker;

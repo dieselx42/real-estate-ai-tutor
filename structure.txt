@@ -1,0 +1,74 @@
+.
+├── LICENSE
+├── README.md
+├── backend
+│   ├── __init__.py
+│   ├── app
+│   │   ├── __init__.py
+│   │   └── main.py
+│   ├── models
+│   ├── routes
+│   │   ├── __init__.py
+│   │   ├── ai.py
+│   │   ├── progress.py
+│   │   ├── questions.py
+│   │   ├── recommendations.py
+│   │   ├── sessions.py
+│   │   └── users.py
+│   ├── schemas
+│   └── services
+├── frontend
+│   ├── README.md
+│   ├── app
+│   │   ├── auth
+│   │   │   ├── login
+│   │   │   │   └── page.tsx
+│   │   │   └── signup
+│   │   │       └── page.tsx
+│   │   ├── badges
+│   │   │   └── page.tsx
+│   │   ├── components
+│   │   │   ├── Footer.tsx
+│   │   │   ├── GeneratedQuestion.tsx
+│   │   │   ├── Header.tsx
+│   │   │   ├── ProgressTracker.tsx
+│   │   │   ├── QuestionList.tsx
+│   │   │   └── QuestionList.tsx copy
+│   │   ├── dashboard
+│   │   │   └── page.tsx
+│   │   ├── exams
+│   │   │   └── page.tsx
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   ├── leaderboard
+│   │   │   └── page.tsx
+│   │   ├── page.tsx
+│   │   ├── profile
+│   │   │   └── page.tsx
+│   │   └── services
+│   ├── context
+│   │   └── auth.ts
+│   ├── eslint.config.mjs
+│   ├── hooks
+│   ├── next-env.d.ts
+│   ├── next.config.ts
+│   ├── package-lock.json
+│   ├── package.json
+│   ├── postcss.config.mjs
+│   ├── public
+│   │   ├── file.svg
+│   │   ├── globe.svg
+│   │   ├── next.svg
+│   │   ├── vercel.svg
+│   │   └── window.svg
+│   ├── tailwind.config.ts
+│   ├── tsconfig.json
+│   └── utils
+│       ├── api.ts
+│       ├── auth.ts
+│       └── firebaseConfig.ts
+├── roadmap.md
+└── structure.txt
+
+23 directories, 49 files

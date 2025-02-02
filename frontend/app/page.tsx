@@ -1,5 +1,6 @@
 "use client";
 
+import "../app/globals.css"; // ✅ Make sure this path is correct
 import { useEffect, useState } from "react";
 import GeneratedQuestion from "./components/GeneratedQuestion";
 import QuestionList from "./components/QuestionList";
@@ -12,17 +13,24 @@ interface BackendData {
   data: string;
 }
 
+interface Question {
+  question: string;
+  options: string[];
+  answer: string;
+}
+
 export default function Home() {
   const [data, setData] = useState<BackendData | null>(null);
-  const [questions, setQuestions] = useState<string[]>([]);
+  const [questions, setQuestions] = useState<Question[]>([]);
   const [userAnswers, setUserAnswers] = useState<string[]>([]);
   const [correctAnswers, setCorrectAnswers] = useState<number>(0);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
+  const [correctAnswerKeys, setCorrectAnswerKeys] = useState<{ [key: number]: string }>({});
 
   const fetchInitialData = async () => {
     try {
       console.log("Clearing cached user answers...");
-      localStorage.removeItem("userAnswers"); // Clears stored selections to prevent cache issues
+      localStorage.removeItem("userAnswers");
 
       console.log("Fetching initial data...");
       const backendData = await fetchData("/data");
@@ -32,8 +40,26 @@ export default function Home() {
       console.log("Fetched Questions:", questionData);
 
       if (questionData.questions && questionData.questions.length > 0) {
-        setQuestions(questionData.questions);
-        setUserAnswers(new Array(questionData.questions.length).fill(""));
+        // ✅ Ensure the API returns structured question objects
+        const structuredQuestions: Question[] = questionData.questions.map((q: any, index: number) => {
+          if (q.question && Array.isArray(q.options) && q.answer) {
+            return q; // Return as-is if structured properly
+          } else {
+            console.error(`❌ Unexpected question format at index ${index}:`, q);
+            return null; // Prevents invalid questions from breaking rendering
+          }
+        }).filter(Boolean); // Remove null values
+
+        setQuestions(structuredQuestions);
+        setUserAnswers(new Array(structuredQuestions.length).fill(""));
+
+        // ✅ Extract correct answers
+        const extractedAnswers: { [key: number]: string } = {};
+        structuredQuestions.forEach((q, index) => {
+          extractedAnswers[index] = q.answer;
+        });
+
+        setCorrectAnswerKeys(extractedAnswers);
       } else {
         setQuestions([]);
         setUserAnswers([]);
@@ -46,59 +72,46 @@ export default function Home() {
     }
   };
 
+  // ✅ Updated `handleAnswer` to match new question format
 const handleAnswer = (questionIndex: number, selectedOption: string) => {
+  console.log("🟢 Answer Clicked:", selectedOption);
+
   if (!questions || !questions[questionIndex]) {
     console.error(`❌ Question at index ${questionIndex} is not valid.`);
     return;
   }
 
-  const questionText = questions[questionIndex];
+  const correctAnswer = questions[questionIndex].answer;
 
-  // Find the correct answer line
-  const correctAnswerLine = questionText
-    .split("\n")
-    .find((line) => line.toLowerCase().startsWith("answer:"));
+  // ✅ Extract only the answer letter (A, B, C, D) from both selected and correct answers
+  const extractAnswerLetter = (answer: string) => {
+    const match = answer.match(/^[A-D]/); // Match the first letter (A, B, C, D)
+    return match ? match[0] : ""; // Return the matched letter or empty string
+  };
 
-  if (!correctAnswerLine) {
-    console.error(`❌ Could not find the correct answer for question ${questionIndex + 1}`);
-    return;
-  }
+  const selectedAnswerLetter = extractAnswerLetter(selectedOption);
+  const correctAnswerLetter = extractAnswerLetter(correctAnswer);
 
-  // ✅ Extract only the first letter (A, B, C, D)
-  const correctAnswerMatch = correctAnswerLine.replace(/answer:\s*/i, "").trim().match(/^([A-D])/i);
-  const correctAnswer = correctAnswerMatch ? correctAnswerMatch[1].toUpperCase() : "";
+  const isCorrect = selectedAnswerLetter === correctAnswerLetter;
 
-  // ✅ Extract only the letter from the user's selected answer (A, B, C, D)
-  const userAnswerMatch = selectedOption.match(/^([A-D])/i);
-  const userAnswer = userAnswerMatch ? userAnswerMatch[1].toUpperCase() : "";
+  console.log(`🟢 User Selected: '${selectedOption}', Correct Answer: '${correctAnswer}', Match: ${isCorrect}`);
 
-  console.log(`🟢 User Selected: '${userAnswer}', Extracted Correct Answer: '${correctAnswer}'`);
-
-  const isCorrect = userAnswer === correctAnswer;
-
-  // ✅ Force React to update the state immediately
   setUserAnswers((prev) => {
     const updated = [...prev];
-    updated[questionIndex] = userAnswer;
+    updated[questionIndex] = selectedOption;
     return updated;
   });
 
-  setTotalQuestions((prev) => prev + 1);
   if (isCorrect) {
     setCorrectAnswers((prev) => prev + 1);
   }
 
-  // ✅ Force a re-render by setting state again to confirm update
-  setTimeout(() => {
-    setUserAnswers((prev) => [...prev]);
-  }, 10);
+  setTotalQuestions((prev) => prev + 1);
 };
-
-
 
   useEffect(() => {
     fetchInitialData();
-  }, []); // ✅ Properly placed useEffect()
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -112,6 +125,7 @@ const handleAnswer = (questionIndex: number, selectedOption: string) => {
           questions={questions}
           onAnswer={handleAnswer}
           userAnswers={userAnswers}
+          correctAnswers={correctAnswerKeys} // ✅ Pass structured answers
         />
       </main>
       <Footer />

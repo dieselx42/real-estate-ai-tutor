@@ -2,53 +2,129 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 🎨 Define Dark Neon UI Theme */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0f1f; /* Deep navy blue */
+  --foreground: #eaeaea; /* Soft white */
+  --secondary-text: #a1a1a1; /* Lighter gray */
+  --primary: #4c83ff; /* Neon blue */
+  --accent: #e65cff; /* Soft pink */
+  --highlight: #ff9a3c; /* Neon orange */
+  --card-bg: #15192b; /* Dark navy gray */
+  --button-hover: #5a5fff; /* Lighter neon blue */
+  --border-color: #232a3b; /* Dark border for depth */
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #090d1a;
     --foreground: #ededed;
+    --button-hover: #6c73ff;
   }
 }
 
+/* ✅ Apply background and font */
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: 'Poppins', sans-serif;
 }
 
-input, select, textarea {
-  color: var(--foreground); /* Ensure text color adapts to light/dark mode */
-  background-color: var(--background); /* Match background with theme */
-  border: 1px solid #ccc;
-  padding: 8px;
-  border-radius: 4px;
+/* ✅ Card Styling */
+.card {
+  background: var(--card-bg);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-color);
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
 }
 
-input:focus, select:focus, textarea:focus {
-  outline: 2px solid #007BFF; /* Add focus ring for better accessibility */
-  outline-offset: 2px;
+/* ✅ Answer Buttons with Neon Glow */
+.answer-button {
+  text-align: left;
+  font-weight: 500;
+  color: var(--foreground);
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
+  padding: 12px;
+  width: 100%;
+  border-radius: 12px;
+  transition: background 0.3s, border-color 0.3s, transform 0.1s;
 }
 
-input::placeholder, textarea::placeholder {
-  color: #888; /* Ensure placeholder text is always visible */
+/* ✅ Neutral state (before selecting) */
+.answer-neutral:hover {
+  background: var(--primary);
+  border-color: var(--highlight);
+  transform: scale(1.02);
 }
 
-/* Ensure dark text for buttons and inputs */
-button, input, select, textarea {
-  color: #000; /* Dark text */
-  background-color: #fff; /* White background */
-  border: 1px solid #ccc; /* Subtle border */
+/* ✅ Hover Effect */
+.answer-button:hover {
+  background: var(--primary);
+  border-color: var(--highlight);
+  transform: scale(1.02);
 }
 
-button:disabled {
-  color: #666; /* Slightly lighter text for disabled buttons */
-  background-color: #f9f9f9; /* Light gray background for disabled state */
+/* ✅ Selected Answer */
+.answer-selected {
+  background: var(--accent);
+  color: white !important;
 }
 
-input::placeholder, textarea::placeholder {
-  color: #888; /* Subtle placeholder color */
+/* ✅ Correct Answer */
+.answer-correct {
+  background-color: #28a745 !important; /* ✅ Green */
+  border-color: #28a745 !important;
+  color: white !important;
+}
+
+/* ✅ Incorrect Answer */
+.answer-incorrect {
+  background-color: #dc3545 !important; /* ❌ Red */
+  border-color: #dc3545 !important;
+  color: white !important;
+}
+
+/* ✅ Menu Buttons with Gradient Glow */
+.menu-button {
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  color: white;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  transition: background 0.3s ease, transform 0.1s ease-in-out;
+}
+
+.menu-button:hover {
+  background: linear-gradient(135deg, var(--button-hover), var(--highlight));
+  transform: scale(1.05);
+}
+
+/* ✅ Logout Button */
+.logout-button {
+  background: var(--highlight);
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-weight: bold;
+  border: none;
+  transition: background 0.3s ease, transform 0.1s ease-in-out;
+}
+
+.logout-button:hover {
+  background: #ff7b22;
+  transform: scale(1.05);
+}
+
+/* ✅ Progress Tracker */
+.progress-tracker {
+  background: var(--card-bg);
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--foreground);
 }

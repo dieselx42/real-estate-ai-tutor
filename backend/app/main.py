@@ -1,112 +1,58 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import openai
 import os
+import logging
 from dotenv import load_dotenv
 
-# Correct import path for routes
+# Import routers
 from routes.questions import router as questions_router
 from routes.progress import router as progress_router
+from routes.users import router as users_router
+from routes.ai import router as ai_router
+from routes.sessions import router as sessions_router
 
 # Load environment variables
 load_dotenv()
 
-# Initialize FastAPI app
-app = FastAPI()
+# Open API Key
+openai.api_key = os.getenv("OPENAI_API_KEY")  # ✅ Set API Key
 
-# Enable CORS
+# Initialize logging
+logging.basicConfig(level=logging.INFO)
+
+# Initialize FastAPI app
+app = FastAPI(title="Real Estate AI Tutor API", description="API for AI-based real estate exam prep")
+
+
+# Enable CORS for frontend communication
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Adjust if frontend is hosted elsewhere
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Set OpenAI API key
-openai.api_key = os.getenv("OPENAI_API_KEY")
-
+# ✅ Root Endpoint
 @app.get("/")
 def read_root():
     return {"message": "Welcome to the Real Estate AI Tutor API!"}
 
-@app.get("/api/generate-question")
-def generate_question(topic: str = Query(default="general real estate", description="Topic for the question")):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a real estate tutor preparing students for their licensing exam."},
-                {
-                    "role": "user",
-                    "content": f"""
-                    Generate a real estate exam question about {topic} with four multiple-choice options.
-                    Format the response clearly as follows:
 
-                    Question: [Your question here]
-                    A. Option 1
-                    B. Option 2
-                    C. Option 3
-                    D. Option 4
+# ✅ Health Check Endpoint
+@app.get("/api/health-check", tags=["General"])
+def health_check():
+    return {"status": "OK", "message": "Backend is running successfully!"}
 
-                    Answer: [Correct answer letter]
-                    """
-                },
-            ],
-            max_tokens=200,
-            temperature=0.7,
-        )
-        question = response["choices"][0]["message"]["content"].strip()
-        return {"question": question}
-    except Exception as e:
-        return {"error": str(e)}
-
+# ✅ Data Endpoint
 @app.get("/api/data")
 def get_data():
-    return {"data": "This is some static data from the backend!"}
+    return {"message": "API is working", "data": "Sample backend data"}
 
-@app.get("/api/questions")
-def get_questions(topic: str = "general real estate"):
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": "system", "content": "You are a helpful real estate tutor."},
-                {
-                    "role": "user",
-                    "content": f"""
-                    Generate three real estate exam questions about {topic}, each with four multiple-choice options.
-                    Format each question clearly as follows:
-
-                    Question: [Your question here]
-                    A. Option 1
-                    B. Option 2
-                    C. Option 3
-                    D. Option 4
-                    Answer: [Correct answer letter and explanation]
-                    """
-                },
-            ],
-            max_tokens=1000,
-            temperature=0.7,
-        )
-        # Extract the response content
-        content = response["choices"][0]["message"]["content"].strip()
-
-        # Split the response into individual questions
-        raw_questions = content.split("\n\n")
-
-        # Process each question and separate answers
-        formatted_questions = []
-        for question in raw_questions:
-            if "Answer:" in question:
-                formatted_questions.append(question.strip())
-
-        return {"questions": formatted_questions}
-    except Exception as e:
-        print("Error generating questions:", e)
-        return {"error": str(e)}
-
-# Register API routers
+# ✅ Register API Routes
 app.include_router(questions_router, prefix="/api/questions", tags=["Questions"])
 app.include_router(progress_router, prefix="/api/progress", tags=["Progress"])
+app.include_router(users_router, prefix="/api/user-progress", tags=["User Progress"])
+app.include_router(ai_router, prefix="/api/ai-recommendations", tags=["AI"])
+app.include_router(sessions_router, prefix="/api/upcoming-sessions", tags=["Sessions"])
